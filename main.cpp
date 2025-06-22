@@ -1,81 +1,75 @@
 #include <iostream>
 #include <string>
-#include <regex>
 #include <vector>
+#include <regex>
 
 using namespace std;
 
-// ----------REGEXES----------
+
+//----------REGEXES----------
 
 
 
-// ----------DATA & DATA_SET----------
+//----------HELPER FUNCTIONS----------
+
+string word_extractor(string line)
+{
+    while (line[0] == ' ')
+        line.erase(line.begin());
+    while (line[line.size() - 1] == ' ')
+        line.erase(line.end() - 1);
+    return line;
+}
+
+//----------DATA & DATA_SET----------
 
 class Data
 {
 protected:
     string word;
 public:
-    virtual void set_word(const string& _word) = 0;
-    string get_word() const{ return word; }
+    virtual void set_word(string _word) = 0;
+    string get_word() { return word; }
+};
+
+class String_Data : public Data
+{
+public:
+    void set_word(string _word) override { word = _word; }
 };
 
 class Vector_Data : public Data
 {
 private:
-    vector<int> asci_codes;
+    vector<int> ascii_vector;
 public:
-    vector<int> get_Vector() const{ return asci_codes; }
-    void set_word(const string &_word) override
+    void set_word(string _word) override
     {
-        for (const auto& c : word)
-        {
-            int asci_code = (int)c;
-            asci_codes.push_back(asci_code);
-        }
+        word = _word;
+        for (const char& c : word)
+            ascii_vector.push_back((int)c);
     }
-
-};
-
-class String_Data : public Data
-{
-private:
-public:
-    void set_word(const string &_word) override { word = _word; }
-
 };
 
 class Data_Set
 {
 private:
-    vector<Data*> data;
     string name;
+    vector<Data> data;
 public:
-    vector<Data*> get_all_data() const{ return data; }
-    Data* get_data(int i) const { return data[i]; }
-    void cin_data(Data* d) { data.push_back(d); }
+    const vector<Data>& get_all_data() { return data; }
+    const Data& get_data_at(int index) { return data[index]; }
+    void cin_data() // im gonna call this function in a loop in order to get all the data
+    {
+        string line;
+        getline(cin, line);
+
+    }
 };
 
-// ----------PI MODEL----------
+//----------PI MODEL----------
 
 class PI_Model
-{
-protected:
-    string name;
-    int version;
-    Data_Set train_data;
-public:
-    void train(Data_Set ds) { train_data = ds; }
-    Data_Set get_data_set() const{ return train_data; }
-    
-};
-
-class Math_Geek : public PI_Model
-{
-
-};
-
-class Grammarly : public PI_Model
 {
 
 };
@@ -85,25 +79,38 @@ class Parrots : public PI_Model
 
 };
 
-// ----------RESPONSE----------
+class Grammarly : public PI_Model
+{
+
+};
+
+class Math_Geek : public PI_Model
+{
+
+};
+
+//----------RESPONSE----------
 
 class Response
 {
 private:
-    string response;
+    string text;
     bool has_error;
     string error_text;
 public:
-    void error_happen(bool e)
-    {
-
-    }
+    void error_happen() { has_error = true; }
     void set_error_text(const string& et) { error_text = et; }
-    void set_text(const string& text) { response = text; }
-    void print(){}
+    void set_text(const string& t) { text = t; }
+    void print()
+    {
+        if (has_error)
+            cout << error_text << endl;
+        else
+            cout << text << endl;
+    }
 };
 
-// ----------INT MAIN----------
+//----------INT MAIN----------
 
 int main()
 {
@@ -111,24 +118,22 @@ int main()
     while (true)
     {
         getline(cin, command);
-        // not talking to a specific PI
         if (command.find('!') != string::npos)
         {
-            // end of program
-            if (command == "!end")
+            if (command.find("!end") != string::npos)
             {
                 return 0;
             }
         }
-        // talking to an specific PI
-        else if (command.find("<_") != string::npos)
+
+        else if (command.find("<-") != string::npos)
         {
 
         }
+
         else
         {
             cout << "Invalid Command" << endl;
         }
     }
-
 }
