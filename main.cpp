@@ -8,7 +8,7 @@ using namespace std;
 
 //----------REGEXES----------
 
-
+regex create_data_set_pattern("^!create (\\S+) : word count : (\\d+)(\\s*)$");
 
 //----------HELPER FUNCTIONS----------
 
@@ -57,13 +57,17 @@ private:
     string name;
     vector<Data> data;
 public:
+    Data_Set(const string& n) : name(n) {}
+    string get_name() const { return name; }
     const vector<Data>& get_all_data() { return data; }
     const Data& get_data_at(int index) { return data[index]; }
     void cin_data() // im gonna call this function in a loop in order to get all the data
     {
         string line;
         getline(cin, line);
-
+        string word = word_extractor(line);
+        // back logic needed!
+        cout << "pushed word: \"" << word << "\"" << endl;
     }
 };
 
@@ -114,21 +118,30 @@ public:
 
 int main()
 {
+    vector<Data_Set> data_sets;
     string command;
+    smatch match;
     while (true)
     {
         getline(cin, command);
-        if (command.find('!') != string::npos)
+        if (command[0] == '!')
         {
             if (command.find("!end") != string::npos)
             {
                 return 0;
             }
+            else if (regex_match(command, match, create_data_set_pattern))
+            {
+                Data_Set ds(match[1]);
+                cout << "lets push 4 words to " << ds.get_name() << " !" << endl;
+                for (int i = 0; i < stoi(match[2]); i++)
+                    ds.cin_data();
+            }
         }
 
         else if (command.find("<-") != string::npos)
         {
-
+            cout << command << " called" << endl;
         }
 
         else
