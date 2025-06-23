@@ -8,7 +8,9 @@ using namespace std;
 
 //----------REGEXES----------
 
-regex create_data_set_pattern("^!create (\\S+) : word count : (\\d+)(\\s*)$");
+regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
+regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
+regex show_name_version_pattern("^(\\S+)_v1 <- $INTRO(\\s*)$");
 
 //----------HELPER FUNCTIONS----------
 
@@ -57,7 +59,7 @@ private:
     string name;
     vector<Data> data;
 public:
-    Data_Set(const string& n) : name(n) {}
+    Data_Set(string n) : name(n) {}
     string get_name() const { return name; }
     const vector<Data>& get_all_data() { return data; }
     const Data& get_data_at(int index) { return data[index]; }
@@ -69,28 +71,6 @@ public:
         // back logic needed!
         cout << "pushed word: \"" << word << "\"" << endl;
     }
-};
-
-//----------PI MODEL----------
-
-class PI_Model
-{
-
-};
-
-class Parrots : public PI_Model
-{
-
-};
-
-class Grammarly : public PI_Model
-{
-
-};
-
-class Math_Geek : public PI_Model
-{
-
 };
 
 //----------RESPONSE----------
@@ -114,11 +94,49 @@ public:
     }
 };
 
+//----------PI MODEL----------
+
+class PI_Model
+{
+protected:
+    string name;
+    int version;
+    Data_Set train_data;
+public:
+    PI_Model(string n, int v, Data_Set ds) : name(n), version(v), train_data(ds) {}
+
+
+
+};
+
+class Parrots : public PI_Model
+{
+public:
+    Parrots(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+};
+
+class Grammarly : public PI_Model
+{
+public:
+    Grammarly(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+};
+
+class Math_Geek : public PI_Model
+{
+public:
+    Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+};
+
 //----------INT MAIN----------
 
 int main()
 {
     vector<Data_Set> data_sets;
+    vector<PI_Model*> PI_models;
+    Data_Set dummy_ds("dummy");
+    int parrots_count = 1;
+    int grammarly_count = 1;
+    int math_geek_count = 1;
     string command;
     smatch match;
     while (true)
@@ -136,6 +154,31 @@ int main()
                 cout << "lets push 4 words to " << ds.get_name() << " !" << endl;
                 for (int i = 0; i < stoi(match[2]); i++)
                     ds.cin_data();
+            }
+            else if (regex_match(command, match, create_PI_model_pattern))
+            {
+                if (match[1] == "Parrots")
+                {
+                    PI_models.push_back(new Parrots(match[1], parrots_count, dummy_ds));
+                    cout << "Parrots_v" << parrots_count << " created" << endl;
+                    parrots_count++;
+                }
+                else if (match[1] == "Grammarly")
+                {
+                    PI_models.push_back(new Grammarly(match[1], grammarly_count, dummy_ds));
+                    cout << "Grammarly_v" << grammarly_count << " created" << endl;
+                    grammarly_count++;
+                }
+                else if (match[1] == "MathGeek")
+                {
+                    PI_models.push_back(new Math_Geek(match[1], math_geek_count, dummy_ds));
+                    cout << "MathGeek_v" << math_geek_count << " created" << endl;
+                    math_geek_count++;
+                }
+                else
+                {
+                    cout << "!!! Error : Invalid name for PI !!!" << endl;
+                }
             }
         }
 
