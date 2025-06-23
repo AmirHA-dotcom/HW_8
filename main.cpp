@@ -5,12 +5,11 @@
 
 using namespace std;
 
-
 //----------REGEXES----------
 
 regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
 regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
-regex show_name_version_pattern("^(\\S+)_v1 <- $INTRO(\\s*)$");
+regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- $INTRO(\s*)$)");
 
 //----------HELPER FUNCTIONS----------
 
@@ -104,7 +103,8 @@ protected:
     Data_Set train_data;
 public:
     PI_Model(string n, int v, Data_Set ds) : name(n), version(v), train_data(ds) {}
-
+    string get_name() const { return name; }
+    int get_version() { return version; }
 
 
 };
@@ -184,7 +184,26 @@ int main()
 
         else if (command.find("<-") != string::npos)
         {
-            cout << command << " called" << endl;
+            if (regex_match(command, match, show_name_version_pattern))
+            {
+                PI_Model* PI = nullptr;
+                for (const auto& pi : PI_models)
+                {
+                    if (pi->get_name() == match[1] && match[2] == pi->get_version())
+                    {
+                        PI = pi;
+                        break;
+                    }
+                }
+                if (PI == nullptr)
+                {
+                    cout << "Invalid Command" << endl;
+                }
+                else
+                {
+                    cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
+                }
+            }
         }
 
         else
