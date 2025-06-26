@@ -56,12 +56,12 @@ class Data_Set
 {
 private:
     string name;
-    vector<Data> data;
+    vector<Data*> data;
 public:
     Data_Set(string n) : name(n) {}
     string get_name() const { return name; }
-    const vector<Data>& get_all_data() { return data; }
-    const Data& get_data_at(int index) { return data[index]; }
+    const vector<Data*> get_all_data() { return data; }
+    const Data* get_data_at(int index) { return data[index]; }
     void cin_data() // im gonna call this function in a loop in order to get all the data
     {
         string line;
