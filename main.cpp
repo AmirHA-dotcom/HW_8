@@ -10,6 +10,7 @@ using namespace std;
 regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
 regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
 regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- $INTRO(\s*)$)");
+regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- $INTRO(\s*)$)");
 
 //----------HELPER FUNCTIONS----------
 
@@ -203,6 +204,23 @@ int main()
                 {
                     cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
                 }
+            }
+
+            if (regex_match(command, match, say_name_version_pattern))
+            {
+                PI_Model* PI = nullptr;
+                for (const auto& pi : PI_models)
+                {
+                    if (pi->get_name() == match[1] && pi->get_version() == stoi(match[2]))
+                    {
+                        PI = pi;
+                        break;
+                    }
+                }
+                if (PI != nullptr)
+                    cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
+                else
+                    cout << "Invalid Command" << endl;
             }
         }
 
