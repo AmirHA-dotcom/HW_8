@@ -12,6 +12,7 @@ regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
 //regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex train_pattern(R"(^!train (\S+)v_(\d+) with (\S+)(\s*)$)");
+regex command_pattern(R"(^(\S+)_v(\d+) <- (\S*)(\s*)$)");
 
 //----------HELPER FUNCTIONS----------
 
@@ -134,7 +135,10 @@ public:
     Parrots(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
     Response response(string input) override
     {
-
+        Response response;
+        input = trim(input);
+        response.set_text(input);
+        return response;
     }
     void train(Data_Set& ds) override
     {
@@ -148,11 +152,50 @@ public:
 
 class Grammarly : public PI_Model
 {
+private:
+    bool autocorrect;
+    int compare(const string& s1, const string& s2) {
+        int m = s1.size(), n = s2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1));
+
+        for (int i = 0; i <= m; i++) dp[i][0] = i;
+        for (int j = 0; j <= n; j++) dp[0][j] = j;
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s1[i - 1] == s2[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1];
+                else
+                    dp[i][j] = 1 + min({dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]});
+            }
+        }
+
+        return dp[m][n];
+    }
 public:
-    Grammarly(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+    Grammarly(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { autocorrect = false; }
     Response response(string input) override
     {
-
+        Response response;
+        input = trim(input);
+        if (input == "$ATON") {
+            autocorrect = true;
+            response.set_text("autocorrect <= true");
+            return response;
+        }
+        else if (input == "$ATOFF") {
+            autocorrect = false;
+            response.set_text("autocorrect <= false");
+            return response;
+        }
+        else if (!autocorrect)
+        {
+            response.set_text(input);
+        }
+        else if (autocorrect)
+        {
+            // not codded yet
+        }
     }
     void train(Data_Set& ds) override
     {
