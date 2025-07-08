@@ -9,8 +9,8 @@ using namespace std;
 
 regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
 regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
-regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- $INTRO(\s*)$)");
-regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- $INTRO(\s*)$)");
+regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
+regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 
 //----------HELPER FUNCTIONS----------
 
