@@ -106,6 +106,8 @@ public:
     PI_Model(string n, int v, Data_Set ds) : name(n), version(v), train_data(ds) {}
     string get_name() const { return name; }
     int get_version() { return version; }
+    virtual Response response(string input) = 0;
+    virtual void train(const Data_Set& ds) = 0;
 
 
 };
@@ -114,18 +116,42 @@ class Parrots : public PI_Model
 {
 public:
     Parrots(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+    Response response(string input) override
+    {
+
+    }
+    void train(const Data_Set& ds) override
+    {
+
+    }
 };
 
 class Grammarly : public PI_Model
 {
 public:
     Grammarly(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+    Response response(string input) override
+    {
+
+    }
+    void train(const Data_Set& ds) override
+    {
+
+    }
 };
 
 class Math_Geek : public PI_Model
 {
 public:
     Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+    Response response(string input) override
+    {
+
+    }
+    void train(const Data_Set& ds) override
+    {
+
+    }
 };
 
 //----------INT MAIN----------
@@ -151,10 +177,10 @@ int main()
             }
             else if (regex_match(command, match, create_data_set_pattern))
             {
-                Data_Set ds(match[1]);
-                cout << "lets push 4 words to " << ds.get_name() << " !" << endl;
+                data_sets.push_back(Data_Set(match[1]));
+                cout << "lets push 4 words to " << data_sets.back().get_name() << " !" << endl;
                 for (int i = 0; i < stoi(match[2]); i++)
-                    ds.cin_data();
+                    data_sets.back().cin_data();
             }
             else if (regex_match(command, match, create_PI_model_pattern))
             {
@@ -185,26 +211,26 @@ int main()
 
         else if (command.find("<-") != string::npos)
         {
-            if (regex_match(command, match, show_name_version_pattern))
-            {
-                PI_Model* PI = nullptr;
-                for (const auto& pi : PI_models)
-                {
-                    if (pi->get_name() == match[1] && match[2] == pi->get_version())
-                    {
-                        PI = pi;
-                        break;
-                    }
-                }
-                if (PI == nullptr)
-                {
-                    cout << "Invalid Command" << endl;
-                }
-                else
-                {
-                    cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
-                }
-            }
+//            if (regex_match(command, match, show_name_version_pattern))
+//            {
+//                PI_Model* PI = nullptr;
+//                for (const auto& pi : PI_models)
+//                {
+//                    if (pi->get_name() == match[1] && match[2] == pi->get_version())
+//                    {
+//                        PI = pi;
+//                        break;
+//                    }
+//                }
+//                if (PI == nullptr)
+//                {
+//                    cout << "Invalid Command" << endl;
+//                }
+//                else
+//                {
+//                    cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
+//                }
+//            }
 
             if (regex_match(command, match, say_name_version_pattern))
             {
