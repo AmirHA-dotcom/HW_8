@@ -9,8 +9,9 @@ using namespace std;
 
 regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
 regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
-regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
+//regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
+regex train_pattern(R"(^!train (\S+)v_(\d+) with (\S+)(\s*)$)");
 
 //----------HELPER FUNCTIONS----------
 
@@ -20,6 +21,13 @@ string word_extractor(string line)
         line.erase(line.begin());
     while (line[line.size() - 1] == ' ')
         line.erase(line.end() - 1);
+    return line;
+}
+
+string trim(string line)
+{
+    while (line[0] == ' ')
+        line.erase(line.begin());
     return line;
 }
 
@@ -235,6 +243,34 @@ int main()
                 else
                 {
                     cout << "!!! Error : Invalid name for PI !!!" << endl;
+                }
+            }
+            else if (regex_match(command, match, train_pattern))
+            {
+                PI_Model* PI = nullptr;
+                Data_Set* DS = nullptr;
+                for (const auto& pi : PI_models)
+                {
+                    if (match[1] == pi->get_name() && stoi(match[2]) == pi->get_version())
+                    {
+                        PI = pi;
+                    }
+                }
+                for (auto& ds : data_sets)
+                {
+                    if (match[3] == ds.get_name())
+                    {
+                        DS = &ds;
+                    }
+                }
+                if (PI != nullptr && DS != nullptr)
+                {
+                    PI->train(*DS);
+                    cout << "Trained " << PI->get_name() << "_v" << PI->get_version() << " with dataset " << DS->get_name() << endl;
+                }
+                else
+                {
+                    cout << "Invalid Command" << endl;
                 }
             }
         }
