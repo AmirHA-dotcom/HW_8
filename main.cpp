@@ -51,6 +51,10 @@ public:
         for (const char& c : word)
             ascii_vector.push_back((int)c);
     }
+    vector<int>& get_ascii_vector()
+    {
+        return ascii_vector;
+    }
 };
 
 class Data_Set
@@ -61,7 +65,7 @@ private:
 public:
     Data_Set(string n) : name(n) {}
     string get_name() const { return name; }
-    const vector<Data*> get_all_data() { return data; }
+    const vector<Data*>& get_all_data() { return data; }
     const Data* get_data_at(int index) { return data[index]; }
     void cin_data() // im gonna call this function in a loop in order to get all the data
     {
@@ -70,6 +74,10 @@ public:
         string word = word_extractor(line);
         // back logic needed!
         cout << "pushed word: \"" << word << "\"" << endl;
+    }
+    void add_data(Data* new_data)
+    {
+        data.push_back(new_data);
     }
 };
 
@@ -107,7 +115,7 @@ public:
     string get_name() const { return name; }
     int get_version() { return version; }
     virtual Response response(string input) = 0;
-    virtual void train(const Data_Set& ds) = 0;
+    virtual void train(Data_Set& ds) = 0;
 
 
 };
@@ -120,9 +128,13 @@ public:
     {
 
     }
-    void train(const Data_Set& ds) override
+    void train(Data_Set& ds) override
     {
-
+        vector<Data*> source_data = ds.get_all_data();
+        for (Data* d : source_data)
+        {
+            this->train_data.add_data(d);
+        }
     }
 };
 
@@ -134,23 +146,41 @@ public:
     {
 
     }
-    void train(const Data_Set& ds) override
+    void train(Data_Set& ds) override
     {
-
+        vector<Data*> source_data = ds.get_all_data();
+        for (Data* d : source_data)
+        {
+            this->train_data.add_data(d);
+        }
     }
 };
 
 class Math_Geek : public PI_Model
 {
+private:
+    int data_vector_size;
 public:
-    Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) {}
+    Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { data_vector_size = 5; }
     Response response(string input) override
     {
 
     }
-    void train(const Data_Set& ds) override
+    void train(Data_Set& ds) override
     {
-
+        vector<Data*> source_data = ds.get_all_data();
+        for (Data* d : source_data) {
+            Vector_Data* vd = dynamic_cast<Vector_Data*>(d);
+            if (vd)
+            {
+                vector<int>& vec = vd->get_ascii_vector();
+                // too long
+                while (vec.size() > this->data_vector_size) { vec.pop_back(); }
+                // too short
+                while (vec.size() < this->data_vector_size) { vec.push_back(' '); }
+            }
+            this->train_data.add_data(d);
+        }
     }
 };
 
