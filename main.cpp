@@ -81,7 +81,9 @@ public:
         string line;
         getline(cin, line);
         string word = word_extractor(line);
-        // back logic needed!
+        Data* new_data_point = new String_Data();
+        new_data_point->set_word(word);
+        data.push_back(new_data_point);
         cout << "pushed word: \"" << word << "\"" << endl;
     }
     void add_data(Data* new_data)
@@ -259,7 +261,7 @@ int main()
             else if (regex_match(command, match, create_data_set_pattern))
             {
                 data_sets.push_back(Data_Set(match[1]));
-                cout << "lets push 4 words to " << data_sets.back().get_name() << " !" << endl;
+                cout << "lets push " << match[2] << " words to " << data_sets.back().get_name() << " !" << endl;
                 for (int i = 0; i < stoi(match[2]); i++)
                     data_sets.back().cin_data();
             }
