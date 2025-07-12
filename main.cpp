@@ -16,29 +16,20 @@ regex command_pattern(R"(^(\S+)_v(\d+)\s*<-\s*(.*)$)");
 regex change_data_size_vec_pattern(R"(^MathGeek_v(\d+) <- $DVS_(\d+)(\S)(\d+)(\s*)$)");
 //----------HELPER FUNCTIONS----------
 
-string trim(string s)
+string word_extractor(string line)
 {
-    if (s.empty())
-    {
-        return "";
-    }
-    // left
-    int start = 0;
-    while (start < s.length() && isspace(static_cast<unsigned char>(s[start])))
-    {
-        start++;
-    }
-    // right
-    int end = s.length() - 1;
-    while (end >= start && isspace(static_cast<unsigned char>(s[end])))
-    {
-        end--;
-    }
-    // if its all spaces
-    if (end < start) {
-        return "";
-    }
-    return s.substr(start, end - start + 1);
+    while (line[0] == ' ')
+        line.erase(line.begin());
+    while (line[line.size() - 1] == ' ')
+        line.erase(line.end() - 1);
+    return line;
+}
+
+string trim(string line)
+{
+    while (line[0] == ' ')
+        line.erase(line.begin());
+    return line;
 }
 
 //----------DATA & DATA_SET----------
@@ -89,7 +80,7 @@ public:
     {
         string line;
         getline(cin, line);
-        string word = trim(line);
+        string word = word_extractor(line);
         Data* new_data_point = new String_Data();
         new_data_point->set_word(word);
         data.push_back(new_data_point);
