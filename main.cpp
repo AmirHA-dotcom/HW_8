@@ -237,25 +237,25 @@ public:
             else
             {
                 // finding the closest length
-                int min_len_diff = -1;
-                int min_compare_dist = -1;
+                int mininmum_length_differance = -1;
+                int minimum_compare_distance = -1;
 
                 for (Data* data_item : trained_data)
                 {
                     string candidate_word = data_item->get_word();
                     int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(candidate_word.length()));
 
-                    if (min_len_diff == -1 || current_len_diff < min_len_diff)
+                    if (mininmum_length_differance == -1 || current_len_diff < mininmum_length_differance)
                     {
-                        min_len_diff = current_len_diff;
-                        min_compare_dist = compare(input, candidate_word);
+                        mininmum_length_differance = current_len_diff;
+                        minimum_compare_distance = compare(input, candidate_word);
                         best_match_word = candidate_word;
-                    } else if (current_len_diff == min_len_diff)
+                    } else if (current_len_diff == mininmum_length_differance)
                     {
                         int current_dist = compare(input, candidate_word);
-                        if (current_dist < min_compare_dist)
+                        if (current_dist < minimum_compare_distance)
                         {
-                            min_compare_dist = current_dist;
+                            minimum_compare_distance = current_dist;
                             best_match_word = candidate_word;
                         }
                     }
