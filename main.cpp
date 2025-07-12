@@ -13,6 +13,7 @@ regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex train_pattern(R"(^!train (\S+)_v(\d+) with (\S+)(\s*)$)");
 regex command_pattern(R"(^(\S+)_v(\d+)\s*<-\s*(.*)$)");
+regex change_data_size_vec_pattern(R"(^MathGeek_v(\d+) <- $DVS_(\d+)(\S)(\d+)(\s*)$)");
 //----------HELPER FUNCTIONS----------
 
 string word_extractor(string line)
@@ -264,7 +265,8 @@ public:
     void train(Data_Set& ds) override
     {
         vector<Data*> source_data = ds.get_all_data();
-        for (Data* d : source_data) {
+        for (Data* d : source_data)
+        {
             Vector_Data* vd = dynamic_cast<Vector_Data*>(d);
             if (vd)
             {
@@ -277,6 +279,7 @@ public:
             this->train_data.add_data(d);
         }
     }
+    void change_data_vector_size(int size) { data_vector_size = size; }
 };
 
 //----------INT MAIN----------
@@ -400,6 +403,26 @@ int main()
                     cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
                 else
                     cout << "Invalid Command" << endl;
+            }
+            else if (regex_match(command, match, change_data_size_vec_pattern))
+            {
+                PI_Model* PI = nullptr;
+                for (const auto& pi : PI_models)
+                {
+                    if (pi->get_name() == "MathGeek" && pi->get_version() == stoi(match[2]))
+                    {
+                        PI = pi;
+                        break;
+                    }
+                }
+                if (PI != nullptr)
+                {
+                    dynamic_cast<Math_Geek*>(PI)->change_data_vector_size(0);
+                }
+                else
+                {
+                    cout << "Invalid Command" << endl;
+                }
             }
             else if (regex_match(command, match, command_pattern))
             {
