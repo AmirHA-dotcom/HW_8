@@ -199,42 +199,65 @@ public:
         }
         else if (autocorrect)
         {
-            //cout << "called autocorrect" << endl;
             const vector<Data*>& trained_data = this->train_data.get_all_data();
-            // no data
+            // not trained
             if (trained_data.empty())
             {
-                //cout << "No data" << endl;
                 response.set_text(input);
                 return response;
             }
 
-            // to find the closest word
-            string best_match_word = "";
-            int min_len_diff = -1;
-            int min_compare_dist = -1;
-
+            // search for words with the exact same length
+            vector<string> same_length_words;
             for (Data* data_item : trained_data)
             {
-                string selected_word = data_item->get_word();
-                int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(selected_word.length()));
-
-                if (min_len_diff == -1 || current_len_diff < min_len_diff)
+                if (data_item->get_word().length() == input.length())
                 {
-                    // found a word with a closer length
-                    min_len_diff = current_len_diff;
-                    min_compare_dist = compare(input, selected_word);
-                    best_match_word = selected_word;
+                    same_length_words.push_back(data_item->get_word());
                 }
-                else if (current_len_diff == min_len_diff)
+            }
+
+            string best_match_word = "";
+
+            if (!same_length_words.empty())
+            {
+                // best match in the same length vector
+                int min_compare_dist = -1;
+
+                for (const string& candidate_word : same_length_words)
                 {
-                    // same length difference
-                    int current_compare_dist = compare(input, selected_word);
-                    // a better word!
-                    if (current_compare_dist < min_compare_dist)
+                    int current_dist = compare(input, candidate_word);
+                    if (min_compare_dist == -1 || current_dist < min_compare_dist)
                     {
-                        min_compare_dist = current_compare_dist;
-                        best_match_word = selected_word;
+                        min_compare_dist = current_dist;
+                        best_match_word = candidate_word;
+                    }
+                }
+            }
+            else
+            {
+                // finding the closest length
+                int min_len_diff = -1;
+                int min_compare_dist = -1;
+
+                for (Data* data_item : trained_data)
+                {
+                    string candidate_word = data_item->get_word();
+                    int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(candidate_word.length()));
+
+                    if (min_len_diff == -1 || current_len_diff < min_len_diff)
+                    {
+                        min_len_diff = current_len_diff;
+                        min_compare_dist = compare(input, candidate_word);
+                        best_match_word = candidate_word;
+                    } else if (current_len_diff == min_len_diff)
+                    {
+                        int current_dist = compare(input, candidate_word);
+                        if (current_dist < min_compare_dist)
+                        {
+                            min_compare_dist = current_dist;
+                            best_match_word = candidate_word;
+                        }
                     }
                 }
             }
