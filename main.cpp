@@ -193,14 +193,17 @@ public:
         }
         else if (!autocorrect)
         {
+            //cout << "called NO autocorrect" << endl;
             response.set_text(input);
         }
         else if (autocorrect)
         {
+            //cout << "called autocorrect" << endl;
             const vector<Data*>& trained_data = this->train_data.get_all_data();
             // no data
             if (trained_data.empty())
             {
+                cout << "No data" << endl;
                 response.set_text(input);
                 return response;
             }
@@ -400,7 +403,7 @@ int main()
             }
             else if (regex_match(command, match, command_pattern))
             {
-                cout << match[3];
+                //cout << match[3];
                 PI_Model* PI = nullptr;
                 Data_Set* DS = nullptr;
                 for (const auto& pi : PI_models)
@@ -411,9 +414,13 @@ int main()
                     }
                 }
                 if (PI != nullptr)
-                    PI->response(trim(match[3]));
+                {
+                    PI->response(trim(match[3])).print();
+                }
                 else
+                {
                     cout << "Invalid Command" << endl;
+                }
             }
         }
 
