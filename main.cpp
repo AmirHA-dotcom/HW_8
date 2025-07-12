@@ -98,7 +98,7 @@ class Response
 {
 private:
     string text;
-    bool has_error;
+    bool has_error = false;
     string error_text;
 public:
     void error_happen() { has_error = true; }
@@ -328,6 +328,14 @@ int main()
             }
             else if (regex_match(command, match, create_data_set_pattern))
             {
+                string ds_name = match[1];
+                int count     = stoi(match[2]);
+
+                auto it = find_if(data_sets.begin(), data_sets.end(),
+                                  [&](const Data_Set& ds){ return ds.get_name() == ds_name; });
+                if (it != data_sets.end())
+                    data_sets.erase(it);
+
                 data_sets.push_back(Data_Set(match[1]));
                 cout << "lets push " << match[2] << " words to " << data_sets.back().get_name() << " !" << endl;
                 for (int i = 0; i < stoi(match[2]); i++)
