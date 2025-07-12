@@ -11,9 +11,8 @@ regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
 regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
 //regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
-regex train_pattern(R"(^!train (\S+)v_(\d+) with (\S+)(\s*)$)");
-regex command_pattern(R"(^(\S+)_v(\d+) <- (\S*)(\s*)$)");
-
+regex train_pattern(R"(^!train (\S+)_v(\d+) with (\S+)(\s*)$)");
+regex command_pattern(R"(^(\S+)_v(\d+)\s*<-\s*(.*)$)");
 //----------HELPER FUNCTIONS----------
 
 string word_extractor(string line)
@@ -356,6 +355,23 @@ int main()
                 }
                 if (PI != nullptr)
                     cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
+                else
+                    cout << "Invalid Command" << endl;
+            }
+            else if (regex_match(command, match, command_pattern))
+            {
+                cout << match[3];
+                PI_Model* PI = nullptr;
+                Data_Set* DS = nullptr;
+                for (const auto& pi : PI_models)
+                {
+                    if (match[1] == pi->get_name() && stoi(match[2]) == pi->get_version())
+                    {
+                        PI = pi;
+                    }
+                }
+                if (PI != nullptr)
+                    PI->response(trim(match[3]));
                 else
                     cout << "Invalid Command" << endl;
             }
