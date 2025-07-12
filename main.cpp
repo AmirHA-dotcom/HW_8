@@ -179,12 +179,14 @@ public:
     {
         Response response;
         input = trim(input);
-        if (input == "$ATON") {
+        if (input == "$ATON")
+        {
             autocorrect = true;
             response.set_text("autocorrect <= true");
             return response;
         }
-        else if (input == "$ATOFF") {
+        else if (input == "$ATOFF")
+        {
             autocorrect = false;
             response.set_text("autocorrect <= false");
             return response;
@@ -195,8 +197,46 @@ public:
         }
         else if (autocorrect)
         {
-            // not codded yet
+            const vector<Data*>& trained_data = this->train_data.get_all_data();
+            // no data
+            if (trained_data.empty())
+            {
+                response.set_text(input);
+                return response;
+            }
+
+            // to find the closest word
+            string best_match_word = "";
+            int min_len_diff = -1;
+            int min_compare_dist = -1;
+
+            for (Data* data_item : trained_data)
+            {
+                string selected_word = data_item->get_word();
+                int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(selected_word.length()));
+
+                if (min_len_diff == -1 || current_len_diff < min_len_diff)
+                {
+                    // found a word with a closer length
+                    min_len_diff = current_len_diff;
+                    min_compare_dist = compare(input, selected_word);
+                    best_match_word = selected_word;
+                }
+                else if (current_len_diff == min_len_diff)
+                {
+                    // same length difference
+                    int current_compare_dist = compare(input, selected_word);
+                    // a better word!
+                    if (current_compare_dist < min_compare_dist)
+                    {
+                        min_compare_dist = current_compare_dist;
+                        best_match_word = selected_word;
+                    }
+                }
+            }
+            response.set_text(best_match_word);
         }
+        return response;
     }
     void train(Data_Set& ds) override
     {
