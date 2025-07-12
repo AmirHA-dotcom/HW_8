@@ -204,7 +204,7 @@ public:
             // no data
             if (trained_data.empty())
             {
-                cout << "No data" << endl;
+                //cout << "No data" << endl;
                 response.set_text(input);
                 return response;
             }
@@ -363,31 +363,14 @@ int main()
                     cout << "Invalid Command" << endl;
                 }
             }
+            else
+            {
+                cout << "Invalid Command" << endl;
+            }
         }
 
         else if (command.find("<-") != string::npos)
         {
-//            if (regex_match(command, match, show_name_version_pattern))
-//            {
-//                PI_Model* PI = nullptr;
-//                for (const auto& pi : PI_models)
-//                {
-//                    if (pi->get_name() == match[1] && match[2] == pi->get_version())
-//                    {
-//                        PI = pi;
-//                        break;
-//                    }
-//                }
-//                if (PI == nullptr)
-//                {
-//                    cout << "Invalid Command" << endl;
-//                }
-//                else
-//                {
-//                    cout << PI->get_name() << "_v" << PI->get_version() << " -> Hi! I'm " << PI->get_name() << ". You are using version " << PI->get_version() << "!" << endl;
-//                }
-//            }
-
             if (regex_match(command, match, say_name_version_pattern))
             {
                 PI_Model* PI = nullptr;
@@ -438,12 +421,17 @@ int main()
                 }
                 if (PI != nullptr)
                 {
+                    cout << PI->get_name() << "_v" << PI->get_version() << " -> ";
                     PI->response(trim(match[3])).print();
                 }
                 else
                 {
                     cout << "Invalid Command" << endl;
                 }
+            }
+            else
+            {
+                cout << "Invalid Command" << endl;
             }
         }
 
