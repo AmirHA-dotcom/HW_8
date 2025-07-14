@@ -398,6 +398,13 @@ int main()
                 for (int i = 0; i < stoi(match[2]); i++)
                     data_sets.back().cin_data();
             }
+//            else if (regex_match(command, match, create_data_set_pattern))
+//            {
+//                data_sets.push_back(Data_Set(match[1]));
+//                cout << "lets push " << match[2] << " words to " << data_sets.back().get_name() << " !" << endl;
+//                for (int i = 0; i < stoi(match[2]); i++)
+//                    data_sets.back().cin_data();
+//            }
             else if (regex_match(command, match, create_PI_model_pattern))
             {
                 if (match[1] == "Parrots")
