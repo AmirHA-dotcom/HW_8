@@ -13,7 +13,10 @@ regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex train_pattern(R"(^!train (\S+)_v(\d+) with (\S+)(\s*)$)");
 regex command_pattern(R"(^(\S+)_v(\d+)\s*<-\s*(.*)$)");
-regex change_data_size_vec_pattern(R"(^MathGeek_v(\d+) <- $DVS_(\d+)(\S)(\d+)(\s*)$)");
+regex change_data_size_vec_pattern(R"(^MathGeek_v(\d+) <- $DVS_(\.+)(\s*)$)");
+regex single_num("^(\\d+)$");
+regex operation(R"(^(\d+)(\.)(\d+)$)");
+smatch match_change_vec;
 //----------HELPER FUNCTIONS----------
 
 string word_extractor(string line)
@@ -281,6 +284,7 @@ private:
     int data_vector_size;
 public:
     Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { data_vector_size = 5; }
+    int get_data_vector_size() { return data_vector_size; }
     Response response(string input) override
     {
 
@@ -420,18 +424,43 @@ int main()
             }
             else if (regex_match(command, match, change_data_size_vec_pattern))
             {
+                cout << "called" << endl;
                 PI_Model* PI = nullptr;
                 for (const auto& pi : PI_models)
                 {
                     if (pi->get_name() == "MathGeek" && pi->get_version() == stoi(match[2]))
                     {
                         PI = pi;
+                        cout << PI->get_name() << endl; // debug
                         break;
                     }
                 }
                 if (PI != nullptr)
                 {
-                    dynamic_cast<Math_Geek*>(PI)->change_data_vector_size(0);
+                    int new_size = -1;
+
+                    string captured = match[2];
+                    if (regex_match(captured, match_change_vec, single_num))
+                    {
+                        new_size = stoi(match[1]);
+                    }
+                    else if (regex_match(captured, match_change_vec, operation))
+                    {
+                        if (match[2] == "+") { new_size = stoi(match[1]) + stoi(match[3]); }
+                        else if (match[2] == "-") { new_size = stoi(match[1]) - stoi(match[3]); }
+                        else if (match[2] == "*") { new_size = stoi(match[1]) * stoi(match[3]); }
+                        else if (match[2] == "/") { new_size = stoi(match[1]) / stoi(match[3]); }
+                    }
+
+                    if (new_size != -1)
+                    {
+                        dynamic_cast<Math_Geek*>(PI)->change_data_vector_size(new_size);
+                        cout << PI->get_name() << "_v" << PI->get_version() << " -> DataVectorSize <= " << new_size << endl;
+                    }
+                    else
+                    {
+                        cout << PI->get_name() << "_v" << PI->get_version() << " -> !!! Invalid DataVectorSize !!! My DataVectorSize = " << dynamic_cast<Math_Geek*>(PI)->get_data_vector_size() << endl;
+                    }
                 }
                 else
                 {
