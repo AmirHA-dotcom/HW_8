@@ -353,7 +353,10 @@ public:
             this->train_data.add_data(new_vec_data);
         }
     }
-    void change_data_vector_size(int size) { data_vector_size = size; }
+    void change_data_vector_size(int size)
+    {
+        this->data_vector_size = size;
+    }
 };
 
 //----------INT MAIN----------
