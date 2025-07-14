@@ -282,28 +282,75 @@ class Math_Geek : public PI_Model
 {
 private:
     int data_vector_size;
+    long int get_vector_sum(const vector<int>& vec)
+    {
+        long int sum = 0;
+        for (int val : vec)
+        {
+            sum += val;
+        }
+        return sum;
+    }
 public:
     Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { data_vector_size = 5; }
     int get_data_vector_size() { return data_vector_size; }
     Response response(string input) override
     {
+        Response response;
+        input = trim(input);
 
+        const vector<Data*>& trained_data = this->train_data.get_all_data();
+        if (trained_data.empty())
+        {
+            response.set_text(input); // nothing trained
+            return response;
+        }
+
+        // normalize a vector for the input string
+        vector<int> input_vector;
+        for (char const& c : input)
+        {
+            input_vector.push_back(c);
+        }
+        while (input_vector.size() > this->data_vector_size) { input_vector.pop_back(); } // too long
+        while (input_vector.size() < this->data_vector_size) { input_vector.push_back(32); } // too short
+
+        // sum of the input vector
+        long int input_sum = get_vector_sum(input_vector);
+
+        // finding the best match in the trained data
+        string best_match_word = "";
+        long min_sum_diff = -1;
+
+        for (Data* data_item : trained_data)
+        {
+            Vector_Data* vd = static_cast<Vector_Data*>(data_item);
+
+            long int candidate_sum = get_vector_sum(vd->get_ascii_vector());
+            long int current_diff = abs(input_sum - candidate_sum);
+
+            if (min_sum_diff == -1 || current_diff < min_sum_diff)
+            {
+                min_sum_diff = current_diff;
+                best_match_word = vd->get_word();
+            }
+        }
+
+        response.set_text(best_match_word);
+        return response;
     }
     void train(Data_Set& ds) override
     {
-        vector<Data*> source_data = ds.get_all_data();
+        const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
-            Vector_Data* vd = dynamic_cast<Vector_Data*>(d);
-            if (vd)
-            {
-                vector<int>& vec = vd->get_ascii_vector();
-                // too long
-                while (vec.size() > this->data_vector_size) { vec.pop_back(); }
-                // too short
-                while (vec.size() < this->data_vector_size) { vec.push_back(' '); }
-            }
-            this->train_data.add_data(d);
+            Vector_Data* new_vec_data = new Vector_Data();
+            new_vec_data->set_word(d->get_word());
+            // normalize vector to the current size
+            vector<int>& vec = new_vec_data->get_ascii_vector();
+            while (vec.size() > this->data_vector_size) { vec.pop_back(); } // too long
+            while (vec.size() < this->data_vector_size) { vec.push_back(32); } // too short
+            this->train_data.add_data(new_vec_data);
         }
     }
     void change_data_vector_size(int size) { data_vector_size = size; }
