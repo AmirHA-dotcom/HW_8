@@ -13,9 +13,9 @@ regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex train_pattern(R"(^!train (\S+)_v(\d+) with (\S+)(\s*)$)");
 regex command_pattern(R"(^(\S+)_v(\d+)\s*<-\s*(.*)$)");
-regex change_data_size_vec_pattern(R"(^MathGeek_v(\d+) <- $DVS_(\.+)(\s*)$)");
+regex change_data_size_vec_pattern(R"(^MathGeek_v(\d+) <- \$DVS_(\S+)(\s*)$)");
 regex single_num("^(\\d+)$");
-regex operation(R"(^(\d+)(\.)(\d+)$)");
+regex operation(R"(^(\d+)(\S)(\d+)$)");
 smatch match_change_vec;
 //----------HELPER FUNCTIONS----------
 
@@ -424,14 +424,13 @@ int main()
             }
             else if (regex_match(command, match, change_data_size_vec_pattern))
             {
-                cout << "called" << endl;
+                //cout << "change_data_size_vec_pattern called" << endl;
                 PI_Model* PI = nullptr;
                 for (const auto& pi : PI_models)
                 {
-                    if (pi->get_name() == "MathGeek" && pi->get_version() == stoi(match[2]))
+                    if (pi->get_name() == "MathGeek" && pi->get_version() == stoi(match[1]))
                     {
                         PI = pi;
-                        cout << PI->get_name() << endl; // debug
                         break;
                     }
                 }
@@ -442,14 +441,16 @@ int main()
                     string captured = match[2];
                     if (regex_match(captured, match_change_vec, single_num))
                     {
-                        new_size = stoi(match[1]);
+                        //cout << "single called" << endl;
+                        new_size = stoi(match_change_vec[1]);
                     }
                     else if (regex_match(captured, match_change_vec, operation))
                     {
-                        if (match[2] == "+") { new_size = stoi(match[1]) + stoi(match[3]); }
-                        else if (match[2] == "-") { new_size = stoi(match[1]) - stoi(match[3]); }
-                        else if (match[2] == "*") { new_size = stoi(match[1]) * stoi(match[3]); }
-                        else if (match[2] == "/") { new_size = stoi(match[1]) / stoi(match[3]); }
+                        //cout << "operation called" << endl;
+                        if (match_change_vec[2] == "+") { new_size = stoi(match_change_vec[1]) + stoi(match_change_vec[3]); }
+                        else if (match_change_vec[2] == "-") { new_size = stoi(match_change_vec[1]) - stoi(match_change_vec[3]); }
+                        else if (match_change_vec[2] == "*") { new_size = stoi(match_change_vec[1]) * stoi(match_change_vec[3]); }
+                        else if (match_change_vec[2] == "/") { new_size = stoi(match_change_vec[1]) / stoi(match_change_vec[3]); }
                     }
 
                     if (new_size != -1)
