@@ -294,31 +294,27 @@ private:
 public:
     Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { data_vector_size = 5; }
     int get_data_vector_size() { return data_vector_size; }
-    Response response(string input) override
-    {
-        Response response;
+
+    Response response(string input) override {
+        Response res;
         input = trim(input);
 
         const vector<Data*>& trained_data = this->train_data.get_all_data();
         if (trained_data.empty())
         {
-            response.set_text(input); // nothing trained
-            return response;
+            res.set_text(input);
+            return res;
         }
 
-        // normalize a vector for the input string
-        vector<int> input_vector;
-        for (char const& c : input)
-        {
-            input_vector.push_back(c);
-        }
-        while (input_vector.size() > this->data_vector_size) { input_vector.pop_back(); } // too long
-        while (input_vector.size() < this->data_vector_size) { input_vector.push_back(32); } // too short
+        // normalize the input vector
+        vector<int> input_vec;
+        for (char const& c : input) { input_vec.push_back(c); }
 
-        // sum of the input vector
-        long int input_sum = get_vector_sum(input_vector);
+        while (input_vec.size() > this->data_vector_size) { input_vec.pop_back(); }
+        while (input_vec.size() < this->data_vector_size) { input_vec.push_back(32); }
 
-        // finding the best match in the trained data
+        long int input_sum = get_vector_sum(input_vec);
+
         string best_match_word = "";
         long min_sum_diff = -1;
 
@@ -326,7 +322,14 @@ public:
         {
             Vector_Data* vd = static_cast<Vector_Data*>(data_item);
 
-            long int candidate_sum = get_vector_sum(vd->get_ascii_vector());
+            // copying the vector
+            vector<int> candidate_vec = vd->get_ascii_vector();
+
+            // normalize
+            while (candidate_vec.size() > this->data_vector_size) { candidate_vec.pop_back(); }
+            while (candidate_vec.size() < this->data_vector_size) { candidate_vec.push_back(32); }
+
+            long int candidate_sum = get_vector_sum(candidate_vec);
             long int current_diff = abs(input_sum - candidate_sum);
 
             if (min_sum_diff == -1 || current_diff < min_sum_diff)
@@ -335,10 +338,10 @@ public:
                 best_match_word = vd->get_word();
             }
         }
-
-        response.set_text(best_match_word);
-        return response;
+        res.set_text(best_match_word);
+        return res;
     }
+
     void train(Data_Set& ds) override
     {
         const vector<Data*>& source_data = ds.get_all_data();
