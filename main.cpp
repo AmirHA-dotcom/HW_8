@@ -185,6 +185,79 @@ private:
     }
 public:
     Grammarly(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { autocorrect = false; }
+//    Response response(string input) override
+//    {
+//        Response response;
+//        input = trim(input);
+//        if (input == "$ATON")
+//        {
+//            autocorrect = true;
+//            response.set_text("autocorrect <= true");
+//            return response;
+//        }
+//        else if (input == "$ATOFF")
+//        {
+//            autocorrect = false;
+//            response.set_text("autocorrect <= false");
+//            return response;
+//        }
+//        else if (!autocorrect)
+//        {
+//            //cout << "called NO autocorrect" << endl;
+//            response.set_text(input);
+//        }
+//        else if (autocorrect)
+//        {
+//            const vector<Data*>& trained_data = this->train_data.get_all_data();
+//            // not trained
+//            if (trained_data.empty())
+//            {
+//                response.set_text(input);
+//                return response;
+//            }
+//
+//            // search for words with the exact same length
+//            vector<string> same_length_words;
+//            for (Data* data_item : trained_data)
+//            {
+//                if (data_item->get_word().length() == input.length())
+//                {
+//                    same_length_words.push_back(data_item->get_word());
+//                }
+//            }
+//
+//            string best_match_word = "";
+//
+//            // finding the closest length
+//            int mininmum_length_differance = -1;
+//            int minimum_compare_distance = -1;
+//
+//            for (Data* data_item : trained_data)
+//            {
+//                string candidate_word = data_item->get_word();
+//                int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(candidate_word.length()));
+//
+//                if (mininmum_length_differance == -1 || current_len_diff < mininmum_length_differance)
+//                {
+//                    mininmum_length_differance = current_len_diff;
+//                    minimum_compare_distance = compare(input, candidate_word);
+//                    best_match_word = candidate_word;
+//                } else if (current_len_diff == mininmum_length_differance)
+//                {
+//                    int current_dist = compare(input, candidate_word);
+//                    if (current_dist < minimum_compare_distance)
+//                    {
+//                        minimum_compare_distance = current_dist;
+//                        best_match_word = candidate_word;
+//                    }
+//                }
+//            }
+//
+//            response.set_text(best_match_word);
+//        }
+//        return response;
+//    }
+// Replace the response method in the Grammarly class
     Response response(string input) override
     {
         Response response;
@@ -203,20 +276,19 @@ public:
         }
         else if (!autocorrect)
         {
-            //cout << "called NO autocorrect" << endl;
             response.set_text(input);
+            return response;
         }
         else if (autocorrect)
         {
             const vector<Data*>& trained_data = this->train_data.get_all_data();
-            // not trained
             if (trained_data.empty())
             {
                 response.set_text(input);
                 return response;
             }
 
-            // search for words with the exact same length
+            // Per TA: First, check for and collect same-length words.
             vector<string> same_length_words;
             for (Data* data_item : trained_data)
             {
@@ -230,7 +302,8 @@ public:
 
             if (!same_length_words.empty())
             {
-                // best match in the same length vector
+                // --- SCENARIO A: Same-length words EXIST ---
+                // Per TA: Find the word with the minimum absolute value of string::compare.
                 int min_compare_dist = -1;
 
                 for (const string& candidate_word : same_length_words)
@@ -245,28 +318,19 @@ public:
             }
             else
             {
-                // finding the closest length
-                int mininmum_length_differance = -1;
-                int minimum_compare_distance = -1;
+                // --- SCENARIO B: No same-length words exist ---
+                // Per TA: Find the word with the smallest length difference. Lower index wins ties.
+                int min_len_diff = -1;
 
                 for (Data* data_item : trained_data)
                 {
                     string candidate_word = data_item->get_word();
                     int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(candidate_word.length()));
 
-                    if (mininmum_length_differance == -1 || current_len_diff < mininmum_length_differance)
+                    if (min_len_diff == -1 || current_len_diff < min_len_diff)
                     {
-                        mininmum_length_differance = current_len_diff;
-                        minimum_compare_distance = compare(input, candidate_word);
+                        min_len_diff = current_len_diff;
                         best_match_word = candidate_word;
-                    } else if (current_len_diff == mininmum_length_differance)
-                    {
-                        int current_dist = compare(input, candidate_word);
-                        if (current_dist < minimum_compare_distance)
-                        {
-                            minimum_compare_distance = current_dist;
-                            best_match_word = candidate_word;
-                        }
                     }
                 }
             }
