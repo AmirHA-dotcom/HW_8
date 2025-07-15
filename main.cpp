@@ -93,6 +93,12 @@ public:
     {
         data.push_back(new_data);
     }
+    void clear_data()
+    {
+        for (Data* d : data)
+            delete d;
+        data.clear();
+    }
 };
 
 //----------RESPONSE----------
@@ -344,15 +350,12 @@ public:
 
     void train(Data_Set& ds) override
     {
+        this->train_data.clear_data();
         const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
             Vector_Data* new_vec_data = new Vector_Data();
             new_vec_data->set_word(d->get_word());
-            // normalize vector to the current size
-            vector<int>& vec = new_vec_data->get_ascii_vector();
-            while (vec.size() > this->data_vector_size) { vec.pop_back(); } // too long
-            while (vec.size() < this->data_vector_size) { vec.push_back(32); } // too short
             this->train_data.add_data(new_vec_data);
         }
     }
