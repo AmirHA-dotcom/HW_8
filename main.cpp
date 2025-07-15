@@ -343,6 +343,13 @@ public:
                 min_sum_diff = current_diff;
                 best_match_word = vd->get_word();
             }
+            else if (current_diff == min_sum_diff)
+            {
+                if (vd->get_word().length() > best_match_word.length())
+                {
+                    best_match_word = vd->get_word();
+                }
+            }
         }
         res.set_text(best_match_word);
         return res;
@@ -391,15 +398,21 @@ int main()
                 string ds_name = match[1];
                 int count     = stoi(match[2]);
 
-                auto it = find_if(data_sets.begin(), data_sets.end(),
-                                  [&](const Data_Set& ds){ return ds.get_name() == ds_name; });
-                if (it != data_sets.end())
-                    data_sets.erase(it);
+                auto it = find_if(data_sets.begin(), data_sets.end(),[&](const Data_Set& ds){ return ds.get_name() == ds_name; });
 
-                data_sets.push_back(Data_Set(match[1]));
+                Data_Set* target_ds = nullptr;
+                if (it != data_sets.end())
+                {
+                    target_ds = &(*it);
+                }
+                else
+                {
+                    data_sets.push_back(Data_Set(ds_name));
+                    target_ds = &data_sets.back();
+                }
                 cout << "lets push " << match[2] << " words to " << data_sets.back().get_name() << " !" << endl;
                 for (int i = 0; i < stoi(match[2]); i++)
-                    data_sets.back().cin_data();
+                    target_ds->cin_data();
             }
 //            else if (regex_match(command, match, create_data_set_pattern))
 //            {
