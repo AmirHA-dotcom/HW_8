@@ -9,7 +9,6 @@ using namespace std;
 
 regex create_data_set_pattern(R"(^!create (\S+) : word count : (\d+)(\s*)$)");
 regex create_PI_model_pattern("^!create PI : (\\S+)(\\s*)$");
-//regex show_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex say_name_version_pattern(R"(^(\S+)_v(\d+) <- \$INTRO(\s*)$)");
 regex train_pattern(R"(^!train (\S+)_v(\d+) with (\S+)(\s*)$)");
 regex command_pattern(R"(^(\S+)_v(\d+)\s*<-\s*(.*)$)");
@@ -185,79 +184,7 @@ private:
     }
 public:
     Grammarly(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { autocorrect = false; }
-//    Response response(string input) override
-//    {
-//        Response response;
-//        input = trim(input);
-//        if (input == "$ATON")
-//        {
-//            autocorrect = true;
-//            response.set_text("autocorrect <= true");
-//            return response;
-//        }
-//        else if (input == "$ATOFF")
-//        {
-//            autocorrect = false;
-//            response.set_text("autocorrect <= false");
-//            return response;
-//        }
-//        else if (!autocorrect)
-//        {
-//            //cout << "called NO autocorrect" << endl;
-//            response.set_text(input);
-//        }
-//        else if (autocorrect)
-//        {
-//            const vector<Data*>& trained_data = this->train_data.get_all_data();
-//            // not trained
-//            if (trained_data.empty())
-//            {
-//                response.set_text(input);
-//                return response;
-//            }
-//
-//            // search for words with the exact same length
-//            vector<string> same_length_words;
-//            for (Data* data_item : trained_data)
-//            {
-//                if (data_item->get_word().length() == input.length())
-//                {
-//                    same_length_words.push_back(data_item->get_word());
-//                }
-//            }
-//
-//            string best_match_word = "";
-//
-//            // finding the closest length
-//            int mininmum_length_differance = -1;
-//            int minimum_compare_distance = -1;
-//
-//            for (Data* data_item : trained_data)
-//            {
-//                string candidate_word = data_item->get_word();
-//                int current_len_diff = abs(static_cast<int>(input.length()) - static_cast<int>(candidate_word.length()));
-//
-//                if (mininmum_length_differance == -1 || current_len_diff < mininmum_length_differance)
-//                {
-//                    mininmum_length_differance = current_len_diff;
-//                    minimum_compare_distance = compare(input, candidate_word);
-//                    best_match_word = candidate_word;
-//                } else if (current_len_diff == mininmum_length_differance)
-//                {
-//                    int current_dist = compare(input, candidate_word);
-//                    if (current_dist < minimum_compare_distance)
-//                    {
-//                        minimum_compare_distance = current_dist;
-//                        best_match_word = candidate_word;
-//                    }
-//                }
-//            }
-//
-//            response.set_text(best_match_word);
-//        }
-//        return response;
-//    }
-// Replace the response method in the Grammarly class
+
     Response response(string input) override
     {
         Response response;
@@ -288,7 +215,6 @@ public:
                 return response;
             }
 
-            // Per TA: First, check for and collect same-length words.
             vector<string> same_length_words;
             for (Data* data_item : trained_data)
             {
@@ -302,8 +228,6 @@ public:
 
             if (!same_length_words.empty())
             {
-                // --- SCENARIO A: Same-length words EXIST ---
-                // Per TA: Find the word with the minimum absolute value of string::compare.
                 int min_compare_dist = -1;
 
                 for (const string& candidate_word : same_length_words)
@@ -318,8 +242,6 @@ public:
             }
             else
             {
-                // --- SCENARIO B: No same-length words exist ---
-                // Per TA: Find the word with the smallest length difference. Lower index wins ties.
                 int min_len_diff = -1;
 
                 for (Data* data_item : trained_data)
@@ -365,7 +287,8 @@ public:
     Math_Geek(string n, int v, Data_Set ds) : PI_Model(n, v, ds) { data_vector_size = 5; }
     int get_data_vector_size() { return data_vector_size; }
 
-    Response response(string input) override {
+    Response response(string input) override
+    {
         Response res;
         input = trim(input);
 
@@ -478,13 +401,6 @@ int main()
                 for (int i = 0; i < stoi(match[2]); i++)
                     target_ds->cin_data();
             }
-//            else if (regex_match(command, match, create_data_set_pattern))
-//            {
-//                data_sets.push_back(Data_Set(match[1]));
-//                cout << "lets push " << match[2] << " words to " << data_sets.back().get_name() << " !" << endl;
-//                for (int i = 0; i < stoi(match[2]); i++)
-//                    data_sets.back().cin_data();
-//            }
             else if (regex_match(command, match, create_PI_model_pattern))
             {
                 if (match[1] == "Parrots")
@@ -564,7 +480,6 @@ int main()
             }
             else if (regex_match(command, match, change_data_size_vec_pattern))
             {
-                //cout << "change_data_size_vec_pattern called" << endl;
                 PI_Model* PI = nullptr;
                 for (const auto& pi : PI_models)
                 {
@@ -581,12 +496,10 @@ int main()
                     string captured = match[2];
                     if (regex_match(captured, match_change_vec, single_num))
                     {
-                        //cout << "single called" << endl;
                         new_size = stoi(match_change_vec[1]);
                     }
                     else if (regex_match(captured, match_change_vec, operation))
                     {
-                        //cout << "operation called" << endl;
                         if (match_change_vec[2] == "+") { new_size = stoi(match_change_vec[1]) + stoi(match_change_vec[3]); }
                         else if (match_change_vec[2] == "-") { new_size = stoi(match_change_vec[1]) - stoi(match_change_vec[3]); }
                         else if (match_change_vec[2] == "*") { new_size = stoi(match_change_vec[1]) * stoi(match_change_vec[3]); }
@@ -610,7 +523,6 @@ int main()
             }
             else if (regex_match(command, match, command_pattern))
             {
-                //cout << match[3];
                 PI_Model* PI = nullptr;
                 Data_Set* DS = nullptr;
                 for (const auto& pi : PI_models)
