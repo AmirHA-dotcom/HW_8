@@ -94,9 +94,12 @@ public:
     }
     void clear_data()
     {
-        for (Data* d : data)
-            delete d;
-        data.clear();
+        if (data.empty())
+        {
+            for (Data* d : data)
+                delete d;
+            data.clear();
+        }
     }
 };
 
@@ -391,13 +394,14 @@ int main()
                 if (it != data_sets.end())
                 {
                     target_ds = &(*it);
+                    target_ds->clear_data();
                 }
                 else
                 {
                     data_sets.push_back(Data_Set(ds_name));
                     target_ds = &data_sets.back();
                 }
-                cout << "lets push " << match[2] << " words to " << data_sets.back().get_name() << " !" << endl;
+                cout << "lets push " << match[2] << " words to " << target_ds->get_name() << " !" << endl;
                 for (int i = 0; i < stoi(match[2]); i++)
                     target_ds->cin_data();
             }
