@@ -92,9 +92,10 @@ public:
     {
         data.push_back(new_data);
     }
+    void set_name(string new_name) { name = new_name; }
     void clear_data()
     {
-        if (data.empty())
+        if (!data.empty())
         {
             for (Data* d : data)
                 delete d;
@@ -138,7 +139,7 @@ public:
     int get_version() { return version; }
     virtual Response response(string input) = 0;
     virtual void train(Data_Set& ds) = 0;
-
+    Data_Set get_data_set () { return train_data; }
 
 };
 
@@ -153,12 +154,17 @@ public:
         response.set_text(input);
         return response;
     }
+    // Use this for both Parrots::train and Grammarly::train
     void train(Data_Set& ds) override
     {
-        vector<Data*> source_data = ds.get_all_data();
+        this->train_data.clear_data();
+        this->train_data.set_name(ds.get_name());
+        const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
-            this->train_data.add_data(d);
+            Data* new_data_point = new String_Data();
+            new_data_point->set_word(d->get_word());
+            this->train_data.add_data(new_data_point);
         }
     }
 };
@@ -214,7 +220,7 @@ public:
             const vector<Data*>& trained_data = this->train_data.get_all_data();
             if (trained_data.empty())
             {
-                response.set_text(input);
+                response.set_text("");
                 return response;
             }
 
@@ -265,10 +271,14 @@ public:
     }
     void train(Data_Set& ds) override
     {
-        vector<Data*> source_data = ds.get_all_data();
+        this->train_data.clear_data();
+        this->train_data.set_name(ds.get_name());
+        const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
-            this->train_data.add_data(d);
+            Data* new_data_point = new String_Data();
+            new_data_point->set_word(d->get_word());
+            this->train_data.add_data(new_data_point);
         }
     }
 };
@@ -298,7 +308,7 @@ public:
         const vector<Data*>& trained_data = this->train_data.get_all_data();
         if (trained_data.empty())
         {
-            res.set_text(input);
+            res.set_text("");
             return res;
         }
 
@@ -348,6 +358,7 @@ public:
     void train(Data_Set& ds) override
     {
         this->train_data.clear_data();
+        this->train_data.set_name(ds.get_name());
         const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
@@ -538,8 +549,12 @@ int main()
                 }
                 if (PI != nullptr)
                 {
-                    cout << PI->get_name() << "_v" << PI->get_version() << " -> ";
-                    PI->response(trim(match[3])).print();
+                    cout << PI->get_name() << "_v" << PI->get_version() << " ->";
+                    if (PI->get_data_set().get_name() != "dummy")
+                    {
+                        cout << " ";
+                        PI->response(trim(match[3])).print();
+                    }
                 }
                 else
                 {
