@@ -20,18 +20,23 @@ smatch match_change_vec;
 
 string word_extractor(string line)
 {
-    while (line[0] == ' ')
-        line.erase(line.begin());
-    while (line[line.size() - 1] == ' ')
-        line.erase(line.end() - 1);
-    return line;
+    size_t first = line.find_first_not_of(' ');
+    if (string::npos == first)
+    {
+        return "";
+    }
+    size_t last = line.find_last_not_of(' ');
+    return line.substr(first, (last - first + 1));
 }
 
 string trim(string line)
 {
-    while (line[0] == ' ')
-        line.erase(line.begin());
-    return line;
+    size_t first = line.find_first_not_of(' ');
+    if (string::npos == first)
+    {
+        return "";
+    }
+    return line.substr(first);
 }
 
 //----------DATA & DATA_SET----------
@@ -78,6 +83,7 @@ public:
     string get_name() const { return name; }
     const vector<Data*>& get_all_data() { return data; }
     const Data* get_data_at(int index) { return data[index]; }
+    void set_name(string n) { name = n; }
     void cin_data() // im gonna call this function in a loop in order to get all the data
     {
         string line;
@@ -92,7 +98,6 @@ public:
     {
         data.push_back(new_data);
     }
-    void set_name(string new_name) { name = new_name; }
     void clear_data()
     {
         if (!data.empty())
@@ -139,7 +144,7 @@ public:
     int get_version() { return version; }
     virtual Response response(string input) = 0;
     virtual void train(Data_Set& ds) = 0;
-    Data_Set get_data_set () { return train_data; }
+
 
 };
 
@@ -154,7 +159,6 @@ public:
         response.set_text(input);
         return response;
     }
-    // Use this for both Parrots::train and Grammarly::train
     void train(Data_Set& ds) override
     {
         this->train_data.clear_data();
@@ -162,9 +166,9 @@ public:
         const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
-            Data* new_data_point = new String_Data();
-            new_data_point->set_word(d->get_word());
-            this->train_data.add_data(new_data_point);
+            Vector_Data* new_vec_data = new Vector_Data();
+            new_vec_data->set_word(d->get_word());
+            this->train_data.add_data(new_vec_data);
         }
     }
 };
@@ -276,9 +280,9 @@ public:
         const vector<Data*>& source_data = ds.get_all_data();
         for (Data* d : source_data)
         {
-            Data* new_data_point = new String_Data();
-            new_data_point->set_word(d->get_word());
-            this->train_data.add_data(new_data_point);
+            Vector_Data* new_vec_data = new Vector_Data();
+            new_vec_data->set_word(d->get_word());
+            this->train_data.add_data(new_vec_data);
         }
     }
 };
@@ -549,12 +553,8 @@ int main()
                 }
                 if (PI != nullptr)
                 {
-                    cout << PI->get_name() << "_v" << PI->get_version() << " ->";
-                    if (PI->get_data_set().get_name() != "dummy")
-                    {
-                        cout << " ";
-                        PI->response(trim(match[3])).print();
-                    }
+                    cout << PI->get_name() << "_v" << PI->get_version() << " -> ";
+                    PI->response(trim(match[3])).print();
                 }
                 else
                 {
